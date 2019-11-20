@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Helmet from 'react-helmet';
+import ReactDOM from 'react-dom'
 import 'isomorphic-fetch'
 
 import './app.styl';
@@ -44,7 +45,10 @@ export default class App extends Component {
       const res = await fetch(route)
       console.log('res', res)
       const html = await res.text()
-      this.setState({ html })
+      this.setState({ html }, () => {
+        ReactDOM.hydrate(document.getElementById('partial-root'))
+
+      })
     }
     render() {
         return (

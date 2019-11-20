@@ -1,7 +1,10 @@
+import React, { useEffect, useState } from 'react'
+import ReactDOM from 'react-dom/server';
 import express from 'express';
 import helmet from 'helmet';
 import { join } from 'path';
 import { log } from 'winston';
+import Partial from './shared/Partial.js'
 
 /**
  * Configures hot reloading and assets paths for local development environment.
@@ -21,6 +24,29 @@ const configureDevelopment = (app) => {
     app.use(require('webpack-hot-middleware')(clientCompiler));
 
     app.use(publicPath, express.static(path));
+
+    app.use('/html', async (req, res) => {
+
+      const app2 = <Partial />
+      const appString = ReactDOM.renderToString(app2);
+
+      res.set('Content-Type', 'text/html').end(appString);
+    });
+
+
+  app.use('/stream', async (req, res) => {
+
+    const app2 = <Partial />
+    const componentStream = ReactDOM.renderToNodeStream(app2);
+    componentStream.pipe(
+      res,
+      { end: false }
+    )
+    componentStream.on('end', () => {
+      // res.write(htmlEnd)
+      res.end()
+    })
+  });
 
     app.use(require('webpack-hot-server-middleware')(multiCompiler, {
         serverRendererOptions: { outputPath: path },
